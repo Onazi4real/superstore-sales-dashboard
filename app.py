@@ -1,27 +1,93 @@
-
 import pandas as pd
 import streamlit as st
 
-# Configure the page
-st.set_page_config (
-page_title = "Superstore Sales Dashboard", layout = "wide")
+# ==========================
+# PAGE CONFIGURATION
+# ==========================
+st.set_page_config(
+    page_title="Superstore Sales Dashboard",
+    layout="wide"
+)
 
-# Load the Dataset
+# ==========================
+# LOAD DATASET
+# ==========================
 df = pd.read_excel("Superstore.xlsx")
 
-# Display the Dashboard Title
+# ==========================
+# SIDEBAR FILTERS
+# ==========================
+st.sidebar.header("🔍 Dashboard Filters")
+
+# Region Filter
+region = st.sidebar.multiselect(
+    "Select Region",
+    options=sorted(df["Region"].unique()),
+    default=sorted(df["Region"].unique())
+)
+
+# Category Filter
+category = st.sidebar.multiselect(
+    "Select Category",
+    options=sorted(df["Category"].unique()),
+    default=sorted(df["Category"].unique())
+)
+
+# Segment Filter
+segment = st.sidebar.multiselect(
+    "Select Segment",
+    options=sorted(df["Segment"].unique()),
+    default=sorted(df["Segment"].unique())
+)
+
+# State Filter
+state = st.sidebar.multiselect(
+    "Select State",
+    options=sorted(df["State"].unique()),
+    default=sorted(df["State"].unique())
+)
+
+# Ship Mode Filter
+ship_mode = st.sidebar.multiselect(
+    "Select Ship Mode",
+    options=sorted(df["Ship Mode"].unique()),
+    default=sorted(df["Ship Mode"].unique())
+)
+
+# Year Filter
+year = st.sidebar.multiselect(
+    "Select Year",
+    options=sorted(df["Order Date"].dt.year.unique()),
+    default=sorted(df["Order Date"].dt.year.unique())
+)
+
+# ==========================
+# APPLY FILTERS
+# ==========================
+df = df[
+    (df["Region"].isin(region)) &
+    (df["Category"].isin(category)) &
+    (df["Segment"].isin(segment)) &
+    (df["State"].isin(state)) &
+    (df["Ship Mode"].isin(ship_mode)) &
+    (df["Order Date"].dt.year.isin(year))
+]
+
+# ==========================
+# DASHBOARD TITLE
+# ==========================
 st.title("📊 Superstore Sales Dashboard")
 
-#Calculate the KPIs
+# ==========================
+# KPI CARDS
+# ==========================
 total_sales = df["Sales"].sum()
 total_profit = df["Profit"].sum()
 total_orders = len(df)
 average_discount = df["Discount"].mean()
 
-# arrange the KPIs with st.columns()
 col1, col2, col3, col4 = st.columns(4)
 
-#Displaying a KPI
 with col1:
     st.metric("Total Sales", f"${total_sales:,.2f}")
 
@@ -29,159 +95,291 @@ with col2:
     st.metric("Total Profit", f"${total_profit:,.2f}")
 
 with col3:
-    st.metric("Total Orders", f"{total_orders}")
+    st.metric("Total Orders", total_orders)
 
 with col4:
-    st.metric("Average Discount", f"{average_discount *100:.2f}%")
+    st.metric("Average Discount", f"{average_discount*100:.2f}%")
 
-# Display Dataset on the Dashboard
+# ==========================
+# DASHBOARD SUMMARY
+# ==========================
+st.markdown("---")
+
+st.subheader("📌 Dashboard Summary")
+
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    st.info(f"Filtered Records: {len(df)}")
+
+with col2:
+    st.success(f"Categories: {df['Category'].nunique()}")
+
+with col3:
+    st.warning(f"States: {df['State'].nunique()}")
+
+# ==========================
+# DATASET PREVIEW
+# ==========================
 st.subheader("Dataset Preview")
-st.dataframe(df.head(10))
+st.dataframe(df.head(5))
 
-#==============================
-# DASHBOARD CHARTS ANALYSIS
-#===============================
-#Chart1: Sales by Category
+
+# ==========================
+# CHARTS ANALYSIS
+# ==========================
+
+# Chart 1 & 2: Sales and Profit by Category
 category_sales = (
-df.groupby("Category")["Sales"].sum()
-.sort_values(ascending=False))
+    df.groupby("Category")["Sales"].sum().sort_values(ascending=False)
+)
 
-st.subheader("📊Sales by Category")
-st.bar_chart(category_sales)
-
-#Chart 2: Profit by Category
 category_profit = (
-df.groupby("Category")["Profit"].sum()
-.sort_values(ascending =False))
+    df.groupby("Category")["Profit"].sum().sort_values(ascending=False)
+)
 
-st.subheader("💰Profit by Category")
-st.bar_chart(category_profit)
+col1, col2 = st.columns(2)
 
-#Chart 3: Sales by Region
-region_sales =(
-df.groupby("Region")["Sales"].sum()
-.sort_values (ascending =False))
+with col1:
+    st.subheader("📊 Total Sales by Category")
+    st.bar_chart(category_sales)
 
-st.subheader("📊Sales by Region")
-st.bar_chart(region_sales)
+with col2:
+    st.subheader("💰 Total Profit by Category")
+    st.bar_chart(category_profit)
 
-#Chart 4: Profit by Region
-region_profit =(
-df.groupby("Region")["Profit"].sum()
-.sort_values(ascending =False))
 
-st.subheader("💰Profit by Region")
-st.bar_chart(region_profit)
+# Chart 3 & 4: Sales and Profit by Region
+region_sales = (
+    df.groupby("Region")["Sales"].sum().sort_values(ascending=False)
+)
 
-#Chart 5: Sales by Segments
+region_profit = (
+    df.groupby("Region")["Profit"].sum().sort_values(ascending=False)
+)
+
+col1, col2 = st.columns(2)
+
+with col1:
+    st.subheader("🌍 Total Sales by Region")
+    st.bar_chart(region_sales)
+
+with col2:
+    st.subheader("💵 Total Profit by Region")
+    st.bar_chart(region_profit)
+
+
+# Chart 5 & 6: Sales and Profit by Segment
 segment_sales = (
-df.groupby("Segment")["Sales"].sum()
-.sort_values(ascending =False))
+    df.groupby("Segment")["Sales"].sum().sort_values(ascending=False)
+)
 
-st.subheader("👥Sales by Segments")
-st.bar_chart(segment_sales)
+segment_profit = (
+    df.groupby("Segment")["Profit"].sum().sort_values(ascending=False)
+)
 
-#Chart 6: Profit by Segments
-segment_profit =(
-df.groupby("Segment")["Profit"].sum()
-.sort_values(ascending=False))
+col1, col2 = st.columns(2)
 
-st.subheader("💵Profit by Segments")
-st.bar_chart(segment_profit)
+with col1:
+    st.subheader("🛒 Total Sales by Segment")
+    st.bar_chart(segment_sales)
 
-#Chart 7:Monthly Sales Trend
-monthly_sales =(
-df.groupby(df["Order Date"].dt.month)["Sales"].sum())
+with col2:
+    st.subheader("💰 Total Profit by Segment")
+    st.bar_chart(segment_profit)
 
-st.subheader("📈Monthly Sales Trend")
-st.line_chart(monthly_sales)
 
-#Chart 8:Monthly Profit Trend
-monthly_profit =(
-df.groupby(df["Order Date"].dt.month)["Profit"].sum())
+# Month Order
+month_order = [
+    "Jan","Feb","Mar","Apr","May","Jun",
+    "Jul","Aug","Sep","Oct","Nov","Dec"
+]
 
-st.subheader("📉Monthly Profit Trend")
-st.line_chart(monthly_profit)
 
-#Chart 9:Sales by Quarter
-quarterly_sales =(
-df.groupby(df["Order Date"].dt.quarter)["Sales"].sum())
+# Chart 7 & 8: Monthly Sales and Profit
+monthly_sales = (
+    df.groupby(df["Order Date"].dt.strftime("%b"))["Sales"]
+    .sum()
+    .reindex(month_order)
+)
 
-st.subheader("📈Quarterly Sales")
-st.bar_chart(quarterly_sales)
+monthly_profit = (
+    df.groupby(df["Order Date"].dt.strftime("%b"))["Profit"]
+    .sum()
+    .reindex(month_order)
+)
 
-#Chart 10: Profit by Quarter
-quarterly_profit =(
-df.groupby(df["Order Date"].dt.quarter)["Profit"].sum())
+col1, col2 = st.columns(2)
 
-st.subheader("📉Quarterly Profit")
-st.bar_chart(quarterly_profit)
+with col1:
+    st.subheader("📈 Monthly Sales Trend")
+    st.line_chart(monthly_sales)
 
-#Chart 11:Sales by Year
+with col2:
+    st.subheader("📉 Monthly Profit Trend")
+    st.line_chart(monthly_profit)
+
+
+# Chart 9 & 10: Quarterly Sales and Profit
+quarterly_sales = (
+    df.groupby(df["Order Date"].dt.quarter)["Sales"].sum()
+)
+
+quarterly_profit = (
+    df.groupby(df["Order Date"].dt.quarter)["Profit"].sum()
+)
+
+col1, col2 = st.columns(2)
+
+with col1:
+    st.subheader("📈 Total Sales by Quarter")
+    st.bar_chart(quarterly_sales)
+
+with col2:
+    st.subheader("📉 Total Profit by Quarter")
+    st.bar_chart(quarterly_profit)
+
+
+# Chart 11 & 12: Yearly Sales and Profit
 yearly_sales = (
-df.groupby(df["Order Date"].dt.year)["Sales"].sum())
+    df.groupby(df["Order Date"].dt.year)["Sales"].sum()
+)
 
-st.subheader("📈Yearly Sales")
-st.bar_chart(yearly_sales)
-
-#Chart 12: Profit by Year
 yearly_profit = (
-df.groupby(df["Order Date"].dt.year)["Profit"].sum())
+    df.groupby(df["Order Date"].dt.year)["Profit"].sum()
+)
 
-st.subheader("📉 Yearly Profit")
-st.bar_chart(yearly_profit)
+col1, col2 = st.columns(2)
+
+with col1:
+    st.subheader("📈 Total Sales by Year")
+    st.bar_chart(yearly_sales)
+
+with col2:
+    st.subheader("📉 Total Profit by Year")
+    st.bar_chart(yearly_profit)
+
+# ==========================
+# TOP PRODUCTS
+# ==========================
+
+# Chart 13 & 14: Top 10 Products by Sales and Profit
+
+top_product_sales = (
+    df.groupby("Product Name")["Sales"]
+    .sum()
+    .sort_values(ascending=False)
+    .head(10)
+)
+
+top_product_profit = (
+    df.groupby("Product Name")["Profit"]
+    .sum()
+    .sort_values(ascending=False)
+    .head(10)
+)
+
+col1, col2 = st.columns(2)
+
+with col1:
+    st.subheader("🏆 Top 10 Products by Sales")
+    st.bar_chart(top_product_sales)
+
+with col2:
+    st.subheader("💰 Top 10 Products by Profit")
+    st.bar_chart(top_product_profit)
 
 
-#Chart 13:Top 10 Products by Sales
-top_product_sales =(
-df.groupby("Product Name")["Sales"].sum()
-.sort_values(ascending=False)
-.head(10))
+# ==========================
+# TOP STATES
+# ==========================
 
-st.subheader("📊Top 10 Products by Sales")
-st.bar_chart(top_product_sales)
+# Chart 15 & 16: Top States by Sales and Profit
 
-#Chart 14: Top 10 Products by Profit
-top_product_profit =(
-df.groupby("Product Name")["Profit"].sum()
-.sort_values(ascending =False)
-.head(10))
+state_sales = (
+    df.groupby("State")["Sales"]
+    .sum()
+    .sort_values(ascending=False)
+    .head(10)
+)
 
-st.subheader("💰Top 10 Products by Profit")
-st.bar_chart(top_product_profit)
+state_profit = (
+    df.groupby("State")["Profit"]
+    .sum()
+    .sort_values(ascending=False)
+    .head(10)
+)
 
-#Chart 15: Top 10 State by Sales
-state_sales =(
-df.groupby("State")["Sales"].sum()
-.sort_values(ascending=False)
-.head(10))
+col1, col2 = st.columns(2)
 
-st.subheader("🏙️Top State by Sales")
-st.bar_chart(state_sales)
+with col1:
+    st.subheader("🏙️ Top 10 States by Sales")
+    st.bar_chart(state_sales)
 
-#Chart 16: Top 10 State by Profit
-state_profit =(
-df.groupby("State")["Profit"].sum()
-.sort_values(ascending=False)
-.head(10))
+with col2:
+    st.subheader("🏙️ Top 10 States by Profit")
+    st.bar_chart(state_profit)
 
-st.subheader("🏙️Top State by Profit")
-st.bar_chart(state_profit)
 
-#Chart 17:Sales by Sub-Category
-subcategory_sales =(
-df.groupby("Sub-Category")["Sales"].sum()
-.sort_values(ascending=False)
-.head(10))
+# ==========================
+# SUB-CATEGORY
+# ==========================
 
-st.subheader("📊Sales by Sub-Category")
-st.bar_chart(subcategory_sales)
+# Chart 17 & 18: Sales and Profit by Sub-Category
 
-#Chart 18: Profit by Sub-Category
+subcategory_sales = (
+    df.groupby("Sub-Category")["Sales"]
+    .sum()
+    .sort_values(ascending=False)
+    .head(10)
+)
+
 subcategory_profit = (
-df.groupby("Sub-Category")["Profit"].sum()
-.sort_values(ascending=False)
-.head(10))
+    df.groupby("Sub-Category")["Profit"]
+    .sum()
+    .sort_values(ascending=False)
+    .head(10)
+)
 
-st.subheader("💰 Profit by Sub-Category")
-st.bar_chart(subcategory_profit)
+col1, col2 = st.columns(2)
+
+with col1:
+    st.subheader("📦 Top 10 Sub-Categories by Sales")
+    st.bar_chart(subcategory_sales)
+
+with col2:
+    st.subheader("💰 Top 10 Sub-Categories by Profit")
+    st.bar_chart(subcategory_profit)
+
+
+# ==========================
+# DOWNLOAD FILTERED DATASET
+# ==========================
+
+st.markdown("---")
+
+csv = df.to_csv(index=False).encode("utf-8")
+
+st.download_button(
+    label="📥 Download Filtered Dataset",
+    data=csv,
+    file_name="filtered_superstore.csv",
+    mime="text/csv"
+)
+
+
+# ==========================
+# FOOTER
+# ==========================
+
+st.markdown("---")
+
+st.markdown(
+    """
+    <div style="text-align:center;">
+        <h4>📊 Superstore Sales Dashboard</h4>
+        <p>Developed by <b>Okpanachi Ogwu</b></p>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
