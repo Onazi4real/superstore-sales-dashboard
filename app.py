@@ -1,13 +1,16 @@
 import pandas as pd
 import streamlit as st
+import plotly.express as px
+from datetime import datetime
 
 # ==========================
 # PAGE CONFIGURATION
 # ==========================
 st.set_page_config(
-    page_title="Superstore Sales Dashboard",
+    page_title="Okpanachi | Superstore Dashboard",
     layout="wide"
 )
+
 
 # ==========================
 # LOAD DATASET
@@ -78,6 +81,8 @@ df = df[
 # ==========================
 st.title("📊 Superstore Sales Dashboard")
 
+st.caption(f"Updated: {datetime.now().strftime('%d %B %Y')}")
+
 # ==========================
 # KPI CARDS
 # ==========================
@@ -118,11 +123,29 @@ with col2:
 with col3:
     st.warning(f"States: {df['State'].nunique()}")
 
+
+st.markdown("### 📈 Business Insights")
+
+col1, col2, col3 = st.columns(3)
+
+best_region = df.groupby("Region")["Sales"].sum().idxmax()
+best_category = df.groupby("Category")["Sales"].sum().idxmax()
+best_product = df.groupby("Product Name")["Sales"].sum().idxmax()
+
+with col1:
+    st.success(f"🏆 Best Region\n\n{best_region}")
+
+with col2:
+    st.info(f"📦 Best Category\n\n{best_category}")
+
+with col3:
+    st.warning(f"⭐ Best Product\n\n{best_product}")
+
 # ==========================
 # DATASET PREVIEW
 # ==========================
 st.subheader("Dataset Preview")
-st.dataframe(df.head(5))
+st.dataframe(df)
 
 
 # ==========================
@@ -140,13 +163,33 @@ category_profit = (
 
 col1, col2 = st.columns(2)
 
+
 with col1:
-    st.subheader("📊 Total Sales by Category")
-    st.bar_chart(category_sales)
+    st.subheader("📊 Sales by Category")
+
+    fig = px.bar(
+        x=category_sales.index,
+        y=category_sales.values,
+        labels={"x": "Category", "y": "Sales"},
+        color=category_sales.values,
+        color_continuous_scale="Blues"
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
+
 
 with col2:
-    st.subheader("💰 Total Profit by Category")
-    st.bar_chart(category_profit)
+    st.subheader("💰 Profit by Category")
+
+    fig = px.bar(
+        x=category_profit.index,
+        y=category_profit.values,
+        labels={"x": "Category", "y": "Profit"},
+        color=category_profit.values,
+        color_continuous_scale="Greens"
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
 
 
 # Chart 3 & 4: Sales and Profit by Region
@@ -161,12 +204,32 @@ region_profit = (
 col1, col2 = st.columns(2)
 
 with col1:
-    st.subheader("🌍 Total Sales by Region")
-    st.bar_chart(region_sales)
+    st.subheader("🌍 Sales by Region")
+
+    fig = px.bar(
+        x=region_sales.index,
+        y=region_sales.values,
+        labels={"x": "Region", "y": "Sales"},
+        color=region_sales.values,
+        color_continuous_scale="Blues"
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
 
 with col2:
-    st.subheader("💵 Total Profit by Region")
-    st.bar_chart(region_profit)
+    st.subheader("💵 Profit by Region")
+
+    fig = px.bar(
+        x=region_profit.index,
+        y=region_profit.values,
+        labels={"x": "Region", "y": "Profit"},
+        color=region_profit.values,
+        color_continuous_scale="Greens"
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
+
+
 
 
 # Chart 5 & 6: Sales and Profit by Segment
@@ -180,13 +243,32 @@ segment_profit = (
 
 col1, col2 = st.columns(2)
 
+
 with col1:
-    st.subheader("🛒 Total Sales by Segment")
-    st.bar_chart(segment_sales)
+    st.subheader("🛒 Sales by Segment")
+
+    fig = px.bar(
+        x=segment_sales.index,
+        y=segment_sales.values,
+        labels={"x": "Segment", "y": "Sales"},
+        color=segment_sales.values,
+        color_continuous_scale="Blues"
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
 
 with col2:
-    st.subheader("💰 Total Profit by Segment")
-    st.bar_chart(segment_profit)
+    st.subheader("💰 Profit by Segment")
+
+    fig = px.bar(
+        x=segment_profit.index,
+        y=segment_profit.values,
+        labels={"x": "Segment", "y": "Profit"},
+        color=segment_profit.values,
+        color_continuous_scale="Greens"
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
 
 
 # Month Order
@@ -211,13 +293,30 @@ monthly_profit = (
 
 col1, col2 = st.columns(2)
 
+
 with col1:
     st.subheader("📈 Monthly Sales Trend")
-    st.line_chart(monthly_sales)
+
+    fig = px.line(
+        x=monthly_sales.index,
+        y=monthly_sales.values,
+        markers=True,
+        labels={"x": "Month", "y": "Sales"}
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
 
 with col2:
     st.subheader("📉 Monthly Profit Trend")
-    st.line_chart(monthly_profit)
+
+    fig = px.line(
+        x=monthly_profit.index,
+        y=monthly_profit.values,
+        markers=True,
+        labels={"x": "Month", "y": "Profit"}
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
 
 
 # Chart 9 & 10: Quarterly Sales and Profit
@@ -231,13 +330,33 @@ quarterly_profit = (
 
 col1, col2 = st.columns(2)
 
+
 with col1:
-    st.subheader("📈 Total Sales by Quarter")
-    st.bar_chart(quarterly_sales)
+    st.subheader("📈 Quarterly Sales")
+
+    fig = px.bar(
+        x=quarterly_sales.index.astype(str),
+        y=quarterly_sales.values,
+        labels={"x": "Quarter", "y": "Sales"},
+        color=quarterly_sales.values,
+        color_continuous_scale="Blues"
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
 
 with col2:
-    st.subheader("📉 Total Profit by Quarter")
-    st.bar_chart(quarterly_profit)
+    st.subheader("📉 Quarterly Profit")
+
+    fig = px.bar(
+        x=quarterly_profit.index.astype(str),
+        y=quarterly_profit.values,
+        labels={"x": "Quarter", "y": "Profit"},
+        color=quarterly_profit.values,
+        color_continuous_scale="Greens"
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
+
 
 
 # Chart 11 & 12: Yearly Sales and Profit
@@ -251,13 +370,32 @@ yearly_profit = (
 
 col1, col2 = st.columns(2)
 
+
 with col1:
-    st.subheader("📈 Total Sales by Year")
-    st.bar_chart(yearly_sales)
+    st.subheader("📈 Yearly Sales")
+
+    fig = px.bar(
+        x=yearly_sales.index.astype(str),
+        y=yearly_sales.values,
+        labels={"x": "Year", "y": "Sales"},
+        color=yearly_sales.values,
+        color_continuous_scale="Blues"
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
 
 with col2:
-    st.subheader("📉 Total Profit by Year")
-    st.bar_chart(yearly_profit)
+    st.subheader("📉 Yearly Profit")
+
+    fig = px.bar(
+        x=yearly_profit.index.astype(str),
+        y=yearly_profit.values,
+        labels={"x": "Year", "y": "Profit"},
+        color=yearly_profit.values,
+        color_continuous_scale="Greens"
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
 
 # ==========================
 # TOP PRODUCTS
@@ -281,13 +419,34 @@ top_product_profit = (
 
 col1, col2 = st.columns(2)
 
+
 with col1:
     st.subheader("🏆 Top 10 Products by Sales")
-    st.bar_chart(top_product_sales)
+
+    fig = px.bar(
+        x=top_product_sales.values,
+        y=top_product_sales.index,
+        orientation="h",
+        labels={"x": "Sales", "y": "Product"},
+        color=top_product_sales.values,
+        color_continuous_scale="Blues"
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
 
 with col2:
     st.subheader("💰 Top 10 Products by Profit")
-    st.bar_chart(top_product_profit)
+
+    fig = px.bar(
+        x=top_product_profit.values,
+        y=top_product_profit.index,
+        orientation="h",
+        labels={"x": "Profit", "y": "Product"},
+        color=top_product_profit.values,
+        color_continuous_scale="Greens"
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
 
 
 # ==========================
@@ -312,13 +471,34 @@ state_profit = (
 
 col1, col2 = st.columns(2)
 
+
 with col1:
-    st.subheader("🏙️ Top 10 States by Sales")
-    st.bar_chart(state_sales)
+    st.subheader("🏙️ Top States by Sales")
+
+    fig = px.bar(
+        x=state_sales.values,
+        y=state_sales.index,
+        orientation="h",
+        labels={"x": "Sales", "y": "State"},
+        color=state_sales.values,
+        color_continuous_scale="Blues"
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
 
 with col2:
-    st.subheader("🏙️ Top 10 States by Profit")
-    st.bar_chart(state_profit)
+    st.subheader("🏙️ Top States by Profit")
+
+    fig = px.bar(
+        x=state_profit.values,
+        y=state_profit.index,
+        orientation="h",
+        labels={"x": "Profit", "y": "State"},
+        color=state_profit.values,
+        color_continuous_scale="Greens"
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
 
 
 # ==========================
@@ -343,13 +523,34 @@ subcategory_profit = (
 
 col1, col2 = st.columns(2)
 
+
 with col1:
-    st.subheader("📦 Top 10 Sub-Categories by Sales")
-    st.bar_chart(subcategory_sales)
+    st.subheader("📊 Sales by Sub-Category")
+
+    fig = px.bar(
+        x=subcategory_sales.values,
+        y=subcategory_sales.index,
+        orientation="h",
+        labels={"x": "Sales", "y": "Sub-Category"},
+        color=subcategory_sales.values,
+        color_continuous_scale="Blues"
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
 
 with col2:
-    st.subheader("💰 Top 10 Sub-Categories by Profit")
-    st.bar_chart(subcategory_profit)
+    st.subheader("💰 Profit by Sub-Category")
+
+    fig = px.bar(
+        x=subcategory_profit.values,
+        y=subcategory_profit.index,
+        orientation="h",
+        labels={"x": "Profit", "y": "Sub-Category"},
+        color=subcategory_profit.values,
+        color_continuous_scale="Greens"
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
 
 
 # ==========================
@@ -372,14 +573,34 @@ st.download_button(
 # FOOTER
 # ==========================
 
+
 st.markdown("---")
 
 st.markdown(
-    """
-    <div style="text-align:center;">
-        <h4>📊 Superstore Sales Dashboard</h4>
-        <p>Developed by <b>Okpanachi Ogwu</b></p>
-    </div>
-    """,
-    unsafe_allow_html=True
+"""
+<center>
+
+### 📊 Superstore Sales Dashboard
+
+Developed by **Okpanachi Ogwu**
+
+Python • Pandas • Plotly • Streamlit
+
+</center>
+""",
+unsafe_allow_html=True
 )
+
+#===============================
+#MAKE IT LOOK PREMIUM 
+#===============================
+
+hide_st_style = """
+<style>
+#MainMenu {visibility:hidden;}
+footer {visibility:hidden;}
+header {visibility:hidden;}
+</style>
+"""
+
+st.markdown(hide_st_style, unsafe_allow_html=True)
