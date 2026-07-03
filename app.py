@@ -7,7 +7,8 @@ from datetime import datetime
 # PAGE CONFIGURATION
 # ==========================
 st.set_page_config(
-    page_title="Okpanachi | Superstore Dashboard",
+    page_title="Superstore Sales Dashboard",
+    page_icon="📊",
     layout="wide"
 )
 
@@ -16,6 +17,7 @@ st.set_page_config(
 # LOAD DATASET
 # ==========================
 df = pd.read_excel("Superstore.xlsx")
+
 
 # ==========================
 # SIDEBAR FILTERS
@@ -81,6 +83,13 @@ df = df[
 # ==========================
 st.title("📊 Superstore Sales Dashboard")
 
+
+st.markdown("""
+This interactive dashboard provides a comprehensive analysis of the Superstore sales dataset.
+
+Use the filters on the left to explore sales performance across regions, categories, segments, states, shipping modes, and years.
+""")
+
 st.caption(f"Updated: {datetime.now().strftime('%d %B %Y')}")
 
 # ==========================
@@ -90,6 +99,11 @@ total_sales = df["Sales"].sum()
 total_profit = df["Profit"].sum()
 total_orders = len(df)
 average_discount = df["Discount"].mean()
+
+profit_margin = (total_profit / total_sales * 100) if total_sales else 0
+
+avg_order_value = (total_sales / total_orders) if total_orders else 0
+
 
 col1, col2, col3, col4 = st.columns(4)
 
@@ -103,7 +117,7 @@ with col3:
     st.metric("Total Orders", total_orders)
 
 with col4:
-    st.metric("Average Discount", f"{average_discount*100:.2f}%")
+    st.metric("Profit Margin", f"{profit_margin:.2f}%")
 
 # ==========================
 # DASHBOARD SUMMARY
@@ -140,13 +154,29 @@ with col2:
 
 with col3:
     st.warning(f"⭐ Best Product\n\n{best_product}")
+    
+    
+st.markdown("### 📊 Dataset Statistics")
+
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    st.metric("Customers", df["Customer Name"].nunique())
+
+with col2:
+    st.metric("Products", df["Product Name"].nunique())
+
+with col3:
+    st.metric("Orders", df["Order ID"].nunique())
 
 # ==========================
 # DATASET PREVIEW
 # ==========================
-st.subheader("Dataset Preview")
-st.dataframe(df)
 
+st.subheader("Dataset Preview")
+
+with st.expander("📄 View Filtered Dataset"):
+    st.dataframe(df, use_container_width=True)
 
 # ==========================
 # CHARTS ANALYSIS
@@ -584,7 +614,9 @@ st.markdown(
 
 Developed by **Okpanachi Ogwu**
 
-Python • Pandas • Plotly • Streamlit
+Python | Pandas | Plotly | Streamlit
+
+2026
 
 </center>
 """,
